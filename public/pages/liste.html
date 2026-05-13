@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Liste — Gestion Étudiants</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <style>
+    /* Modal de modification */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.6); z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #1e293b; border-radius: 14px;
+      padding: 2rem; width: 90%; max-width: 500px;
+      border: 1px solid #334155;
+      animation: popIn .25s ease;
+    }
+    @keyframes popIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+    .modal h2 { color: #c7d2fe; margin-bottom: 1.2rem; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.2rem; }
+    .search-bar {
+      display: flex; gap: 10px; margin-bottom: 1.2rem; align-items: center;
+    }
+    .search-bar input { max-width: 300px; }
+    #count { font-size:.85rem; color:#64748b; margin-left:auto; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">🎓 GestionEtudiant</a>
+  <a class="nav-link" href="/">🏠 Accueil</a>
+  <a class="nav-link" href="/liste">📋 Liste</a>
+  <a class="nav-link" href="/ajouter">➕ Ajouter</a>
+  <a class="nav-link" href="/statistiques">📊 Statistiques</a>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1>📋 Liste des étudiants</h1>
+    <p>Consultez, modifiez ou supprimez un enregistrement</p>
+  </div>
+
+  <div class="card">
+    <div class="search-bar">
+      <input type="text" id="recherche" placeholder="🔍 Rechercher par nom ou numéro..." oninput="filtrer()"/>
+      <a class="btn btn-success" href="/ajouter">➕ Ajouter</a>
+      <span id="count"></span>
+    </div>
+
+    <div class="table-wrap" id="zone-table">
+      <div class="loading"><div class="spinner"></div>Chargement...</div>
+    </div>
+  </div>
+
+  <!-- Statistiques bas de page -->
+  <div class="card">
+    <h2>📈 Récapitulatif de la classe</h2>
+    <div class="stats-grid" id="stats-zone">
+      <div class="stat-box"><div class="stat-label">Moy. Classe</div><div class="stat-value c-violet" id="s-cl">—</div></div>
+      <div class="stat-box"><div class="stat-label">Moy. Min</div><div class="stat-value c-red" id="s-mn">—</div></div>
+      <div class="stat-box"><div class="stat-label">Moy. Max</div><div class="stat-value c-green" id="s-mx">—</div></div>
+      <div class="stat-box"><div class="stat-label">Admis ✅</div><div class="stat-value c-admis" id="s-ad">—</div></div>
+      <div class="stat-box"><div class="stat-label">Redoublants ❌</div><div class="stat-value c-redoub" id="s-rd">—</div></div>
+    </div>
+  </div>
+</main>
+
+<!-- ── Modal de modification ── -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>✏️ Modifier l'étudiant</h2>
+    <div class="modal-grid">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>N° Étudiant</label>
+        <input type="text" id="m-numEt" disabled/>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Nom complet</label>
+        <input type="text" id="m-nom"/>
+      </div>
+      <div class="form-group">
+        <label>Note Maths /20</label>
+        <input type="number" id="m-math" min="0" max="20" step="0.5"/>
+      </div>
+      <div class="form-group">
+        <label>Note Physique /20</label>
+        <input type="number" id="m-phys" min="0" max="20" step="0.5"/>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="enregistrer()">💾 Enregistrer</button>
+      <button class="btn btn-secondary" onclick="fermerModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+  let tousEtudiants = [];
+
+  async function charger() {
+    try {
+      const data = await apiGet(API);
+      tousEtudiants = data.etudiants;
+      afficher(tousEtudiants);
+
+      if (data.stats) {
+        document.getElementById('s-cl').textContent = data.stats.moyenne_classe;
+        document.getElementById('s-mn').textContent = data.stats.moyenne_min;
+        document.getElementById('s-mx').textContent = data.stats.moyenne_max;
+        document.getElementById('s-ad').textContent = data.stats.admis;
+        document.getElementById('s-rd').textContent = data.stats.redoublants;
+      }
+    } catch(e) { notif(e.message, 'error'); }
+  }
+
+  function afficher(liste) {
+    document.getElementById('count').textContent = `${liste.length} étudiant(s)`;
+    if (!liste.length) {
+      document.getElementById('zone-table').innerHTML =
+        `<p style="color:#64748b;padding:2rem;text-align:center">Aucun résultat.</p>`;
+      return;
+    }
+    document.getElementById('zone-table').innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>N°</th><th>Nom</th><th>Math</th><th>Phys</th>
+            <th>Moyenne</th><th>Statut</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${liste.map(e => {
+            const m = parseFloat(e.moyenne);
+            return `<tr>
+              <td style="color:#a5b4fc;font-weight:600">${e.numEt}</td>
+              <td>${e.nom}</td>
+              <td>${e.note_math}</td>
+              <td>${e.note_phys}</td>
+              <td class="${m>=10?'note-ok':'note-ko'}">${m}</td>
+              <td><span class="badge ${m>=10?'badge-admis':'badge-redouble'}">${m>=10?'Admis':'Redoublant'}</span></td>
+              <td style="display:flex;gap:6px">
+                <button class="btn btn-warning" style="padding:5px 12px;font-size:.8rem"
+                  onclick="ouvrirModal('${e.numEt}','${e.nom.replace(/'/g,"\\'")}',${e.note_math},${e.note_phys})">
+                  ✏️ Modifier
+                </button>
+                <button class="btn btn-danger" style="padding:5px 12px;font-size:.8rem"
+                  onclick="supprimer('${e.numEt}')">
+                  🗑️ Supprimer
+                </button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function filtrer() {
+    const q = document.getElementById('recherche').value.toLowerCase();
+    afficher(tousEtudiants.filter(e =>
+      e.nom.toLowerCase().includes(q) || e.numEt.toLowerCase().includes(q)
+    ));
+  }
+
+  // ── Modal ──
+  function ouvrirModal(numEt, nom, math, phys) {
+    document.getElementById('m-numEt').value = numEt;
+    document.getElementById('m-nom').value   = nom;
+    document.getElementById('m-math').value  = math;
+    document.getElementById('m-phys').value  = phys;
+    document.getElementById('modal').classList.add('open');
+  }
+  function fermerModal() {
+    document.getElementById('modal').classList.remove('open');
+  }
+  document.getElementById('modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal')) fermerModal();
+  });
+
+  async function enregistrer() {
+    const numEt     = document.getElementById('m-numEt').value;
+    const nom       = document.getElementById('m-nom').value.trim();
+    const note_math = parseFloat(document.getElementById('m-math').value);
+    const note_phys = parseFloat(document.getElementById('m-phys').value);
+    try {
+      await apiPut(`${API}/${numEt}`, { nom, note_math, note_phys });
+      notif('Étudiant modifié !');
+      fermerModal();
+      charger();
+    } catch(e) { notif(e.message, 'error'); }
+  }
+
+  async function supprimer(numEt) {
+    if (!confirm(`Supprimer l'étudiant ${numEt} ?`)) return;
+    try {
+      await apiDelete(`${API}/${numEt}`);
+      notif('Étudiant supprimé.', 'info');
+      charger();
+    } catch(e) { notif(e.message, 'error'); }
+  }
+
+  charger();
+</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Accueil — Gestion Étudiants</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">🎓 GestionEtudiant</a>
+  <a class="nav-link" href="/">🏠 Accueil</a>
+  <a class="nav-link" href="/liste">📋 Liste</a>
+  <a class="nav-link" href="/ajouter">➕ Ajouter</a>
+  <a class="nav-link" href="/statistiques">📊 Statistiques</a>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1>🏠 Tableau de bord</h1>
+    <p>Vue d'ensemble de la classe</p>
+  </div>
+
+  <!-- Cartes résumé -->
+  <div class="stats-grid" id="resume" style="margin-bottom:1.5rem;">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+
+  <!-- Accès rapides -->
+  <div class="card">
+    <h2>⚡ Accès rapides</h2>
+    <div class="btn-row">
+      <a class="btn btn-primary"   href="/liste">📋 Voir la liste</a>
+      <a class="btn btn-success"   href="/ajouter">➕ Ajouter un étudiant</a>
+      <a class="btn btn-secondary" href="/statistiques">📊 Voir les statistiques</a>
+    </div>
+  </div>
+
+  <!-- Derniers inscrits -->
+  <div class="card">
+    <h2>🕐 Derniers étudiants inscrits</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>N°</th><th>Nom</th><th>Math</th><th>Phys</th><th>Moyenne</th><th>Statut</th>
+          </tr>
+        </thead>
+        <tbody id="derniers"><tr><td colspan="6" class="loading">Chargement...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script src="/js/app.js"></script>
+<script>
+  async function chargerAccueil() {
+    try {
+      const data = await apiGet(API);
+      const { etudiants, stats } = data;
+
+      // ── Cartes résumé ──
+      if (stats) {
+        document.getElementById('resume').innerHTML = `
+          <div class="stat-box">
+            <div class="stat-label">Total étudiants</div>
+            <div class="stat-value c-violet">${stats.total}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Moy. Classe</div>
+            <div class="stat-value c-violet">${stats.moyenne_classe}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Admis ✅</div>
+            <div class="stat-value c-admis">${stats.admis}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Redoublants ❌</div>
+            <div class="stat-value c-redoub">${stats.redoublants}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Moy. Max</div>
+            <div class="stat-value c-green">${stats.moyenne_max}</div>
+          </div>`;
+      }
+
+      // ── 5 derniers ──
+      const derniers = [...etudiants].slice(-5).reverse();
+      document.getElementById('derniers').innerHTML = derniers.map(e => {
+        const m = parseFloat(e.moyenne);
+        return `<tr>
+          <td style="color:#a5b4fc;font-weight:600">${e.numEt}</td>
+          <td>${e.nom}</td>
+          <td>${e.note_math}</td>
+          <td>${e.note_phys}</td>
+          <td class="${m>=10?'note-ok':'note-ko'}">${m}</td>
+          <td><span class="badge ${m>=10?'badge-admis':'badge-redouble'}">${m>=10?'Admis':'Redoublant'}</span></td>
+        </tr>`;
+      }).join('');
+
+    } catch(e) { notif(e.message, 'error'); }
+  }
+
+  chargerAccueil();
+</script>
+</body>
+</html>

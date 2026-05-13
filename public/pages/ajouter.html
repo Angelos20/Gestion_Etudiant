@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Ajouter — Gestion Étudiants</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <style>
+    .form-card { max-width: 600px; }
+    .preview-box {
+      background: #0f172a; border: 1px solid #334155;
+      border-radius: 10px; padding: 1.2rem;
+      margin-top: 1rem; display: none;
+    }
+    .preview-box h3 { font-size: .9rem; color: #64748b; margin-bottom: .7rem; }
+    .preview-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1e293b; font-size:.9rem; }
+    .preview-moy { font-size: 1.4rem; font-weight: 700; text-align: center; margin-top: .8rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">🎓 GestionEtudiant</a>
+  <a class="nav-link" href="/">🏠 Accueil</a>
+  <a class="nav-link" href="/liste">📋 Liste</a>
+  <a class="nav-link" href="/ajouter">➕ Ajouter</a>
+  <a class="nav-link" href="/statistiques">📊 Statistiques</a>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1>➕ Ajouter un étudiant</h1>
+    <p>Remplissez le formulaire ci-dessous pour inscrire un nouvel étudiant</p>
+  </div>
+
+  <div class="card form-card">
+    <h2>📝 Informations de l'étudiant</h2>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>N° Étudiant *</label>
+        <input type="text" id="f-numEt" placeholder="ex: E007" oninput="apercu()"/>
+      </div>
+      <div class="form-group" style="grid-column: span 3">
+        <label>Nom complet *</label>
+        <input type="text" id="f-nom" placeholder="Nom et prénom" oninput="apercu()"/>
+      </div>
+      <div class="form-group">
+        <label>Note Maths /20 *</label>
+        <input type="number" id="f-math" min="0" max="20" step="0.5" placeholder="0–20" oninput="apercu()"/>
+      </div>
+      <div class="form-group">
+        <label>Note Physique /20 *</label>
+        <input type="number" id="f-phys" min="0" max="20" step="0.5" placeholder="0–20" oninput="apercu()"/>
+      </div>
+    </div>
+
+    <!-- Aperçu de la moyenne en temps réel -->
+    <div class="preview-box" id="preview">
+      <h3>Aperçu avant enregistrement</h3>
+      <div class="preview-row"><span>N° Étudiant</span><span id="p-num" style="color:#a5b4fc;font-weight:600"></span></div>
+      <div class="preview-row"><span>Nom</span><span id="p-nom"></span></div>
+      <div class="preview-row"><span>Note Maths</span><span id="p-math"></span></div>
+      <div class="preview-row"><span>Note Physique</span><span id="p-phys"></span></div>
+      <div class="preview-moy" id="p-moy"></div>
+    </div>
+
+    <div class="btn-row" style="margin-top:1.2rem">
+      <button class="btn btn-primary" onclick="soumettre()">✅ Enregistrer dans MySQL</button>
+      <button class="btn btn-secondary" onclick="reinitialiser()">🔄 Réinitialiser</button>
+      <a class="btn btn-secondary" href="/liste">↩ Retour à la liste</a>
+    </div>
+  </div>
+</main>
+
+<script src="/js/app.js"></script>
+<script>
+  // ── Aperçu en temps réel ──
+  function apercu() {
+    const numEt = document.getElementById('f-numEt').value.trim();
+    const nom   = document.getElementById('f-nom').value.trim();
+    const nm    = parseFloat(document.getElementById('f-math').value);
+    const np    = parseFloat(document.getElementById('f-phys').value);
+    const box   = document.getElementById('preview');
+
+    if (!numEt && !nom && isNaN(nm) && isNaN(np)) { box.style.display='none'; return; }
+
+    box.style.display = 'block';
+    document.getElementById('p-num').textContent  = numEt || '—';
+    document.getElementById('p-nom').textContent  = nom   || '—';
+    document.getElementById('p-math').textContent = isNaN(nm) ? '—' : nm;
+    document.getElementById('p-phys').textContent = isNaN(np) ? '—' : np;
+
+    if (!isNaN(nm) && !isNaN(np)) {
+      const moy = ((nm + np) / 2).toFixed(2);
+      const ok  = parseFloat(moy) >= 10;
+      document.getElementById('p-moy').innerHTML =
+        `Moyenne : <span style="color:${ok?'#34d399':'#f87171'}">${moy}/20</span>
+         — <span class="badge ${ok?'badge-admis':'badge-redouble'}">${ok?'Admis':'Redoublant'}</span>`;
+    } else {
+      document.getElementById('p-moy').textContent = '';
+    }
+  }
+
+  // ── Soumission → POST /etudiants → MySQL ──
+  async function soumettre() {
+    const numEt     = document.getElementById('f-numEt').value.trim();
+    const nom       = document.getElementById('f-nom').value.trim();
+    const note_math = parseFloat(document.getElementById('f-math').value);
+    const note_phys = parseFloat(document.getElementById('f-phys').value);
+
+    if (!numEt || !nom || isNaN(note_math) || isNaN(note_phys))
+      return notif('Remplissez tous les champs obligatoires.', 'error');
+    if (note_math<0||note_math>20||note_phys<0||note_phys>20)
+      return notif('Les notes doivent être entre 0 et 20.', 'error');
+
+    try {
+      await apiPost(API, { numEt, nom, note_math, note_phys });
+      notif(`✅ ${nom} ajouté avec succès !`);
+      reinitialiser();
+    } catch(e) { notif(e.message, 'error'); }
+  }
+
+  function reinitialiser() {
+    ['f-numEt','f-nom','f-math','f-phys'].forEach(id =>
+      document.getElementById(id).value = ''
+    );
+    document.getElementById('preview').style.display = 'none';
+  }
+</script>
+</body>
+</html>

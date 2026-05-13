@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Ajouter — Gestion Étudiants</title>
+
+  <link rel="stylesheet" href="/css/style.css"/>
+
+  <style>
+    .form-card { max-width: 600px; }
+    .preview-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin-top: 1rem;
+      display: none;
+    }
+    .preview-box h3 {
+      font-size: .9rem;
+      color: #64748b;
+      margin-bottom: .7rem;
+    }
+    .preview-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid #1e293b;
+      font-size:.9rem;
+    }
+    .preview-moy {
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-align: center;
+      margin-top: .8rem;
+    }
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">🎓 GestionEtudiant</a>
+  <a class="nav-link" href="/">🏠 Accueil</a>
+  <a class="nav-link" href="/liste">📋 Liste</a>
+  <a class="nav-link" href="/ajouter">➕ Ajouter</a>
+  <a class="nav-link" href="/statistiques">📊 Statistiques</a>
+</nav>
+
+<main>
+
+  <div class="card">
+    <h2>📊 Visualisation des moyennes</h2>
+
+    <div class="chart-toggle">
+      <button class="btn-chart active" onclick="switchChart('bar')">Histogramme</button>
+      <button class="btn-chart" onclick="switchChart('pie')">Camembert</button>
+    </div>
+
+    <div id="chart-bar-wrap">
+      <canvas id="chartBar"></canvas>
+    </div>
+
+    <div id="chart-pie-wrap" style="display:none;">
+      <canvas id="chartPie"></canvas>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let chartBar, chartPie;
+
+// Graphiques
+function mettreAJourGraphiques(stats) {
+
+  const barData = {
+    labels: ['Moy. Classe', 'Moy. Min', 'Moy. Max'],
+    datasets: [{
+      label: 'Moyenne',
+      data: [stats.moyenne_classe, stats.moyenne_min, stats.moyenne_max],
+      backgroundColor: ['#6366f1', '#f87171', '#34d399']
+    }]
+  };
+
+  if (chartBar) {
+    chartBar.data = barData;
+    chartBar.update();
+  }
+
+  const pieData = {
+    labels: ['Admis', 'Redoublants'],
+    datasets: [{
+      data: [stats.admis, stats.redoublants],
+      backgroundColor: ['#34d399', '#f87171']
+    }]
+  };
+
+  if (chartPie) {
+    chartPie.data = pieData;
+    chartPie.update();
+  }
+}
+
+function switchChart(type) {
+  document.getElementById('chart-bar-wrap').style.display = type === 'bar' ? 'block' : 'none';
+  document.getElementById('chart-pie-wrap').style.display = type === 'pie' ? 'block' : 'none';
+}
+</script>
+
+</body>
+</html>

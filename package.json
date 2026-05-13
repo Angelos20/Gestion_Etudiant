@@ -1,0 +1,19 @@
+{
+  "name": "gestion-etudiant-v2",
+  "version": "2.0.0",
+  "description": "Gestion des étudiants — Multi-pages + MySQL",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
+    "mysql2": "^3.6.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

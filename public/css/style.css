@@ -1,0 +1,199 @@
+/* ==========================================================
+   public/css/style.css — Styles partagés entre toutes les pages
+   ========================================================== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Barre de navigation ── */
+nav {
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  padding: .75rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-brand {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #a5b4fc;
+  text-decoration: none;
+  margin-right: auto;
+}
+.nav-link {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: .9rem;
+  font-weight: 500;
+  padding: .4rem .75rem;
+  border-radius: 6px;
+  transition: background .2s, color .2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nav-link:hover { background: #334155; color: #e2e8f0; }
+.nav-link.active { background: #312e81; color: #a5b4fc; }
+
+/* ── Contenu principal ── */
+main {
+  flex: 1;
+  padding: 2rem 1rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── En-tête de page ── */
+.page-header { margin-bottom: 1.8rem; }
+.page-header h1 { font-size: 1.6rem; color: #c7d2fe; }
+.page-header p  { color: #64748b; margin-top: .3rem; font-size: .9rem; }
+
+/* ── Carte ── */
+.card {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.card h2 { font-size: 1.05rem; color: #c7d2fe; margin-bottom: 1.2rem; }
+
+/* ── Formulaire ── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 1rem;
+}
+@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+
+.form-group label {
+  display: block;
+  font-size: .78rem;
+  color: #94a3b8;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 9px 13px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  border-radius: 7px;
+  font-size: .9rem;
+  outline: none;
+  transition: border .2s;
+}
+input:focus { border-color: #6366f1; }
+
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: .5rem; }
+
+button, .btn {
+  cursor: pointer;
+  border: none;
+  border-radius: 7px;
+  padding: 9px 22px;
+  font-size: .875rem;
+  font-weight: 600;
+  transition: opacity .2s, transform .1s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+button:hover, .btn:hover { opacity: .85; transform: translateY(-1px); }
+
+.btn-primary  { background: #6366f1; color: #fff; }
+.btn-success  { background: #059669; color: #fff; }
+.btn-warning  { background: #d97706; color: #fff; }
+.btn-danger   { background: #dc2626; color: #fff; }
+.btn-secondary{ background: #334155; color: #e2e8f0; }
+
+/* ── Tableau ── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+th {
+  background: #0f172a;
+  padding: 11px 14px;
+  text-align: left;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: #64748b;
+  border-bottom: 2px solid #334155;
+}
+td { padding: 10px 14px; border-bottom: 1px solid #1e293b; }
+tr:hover td { background: #1e293b88; }
+
+/* ── Badges ── */
+.badge { display: inline-block; padding: 3px 11px; border-radius: 999px; font-size: .75rem; font-weight: 700; }
+.badge-admis    { background: #064e3b; color: #6ee7b7; }
+.badge-redouble { background: #450a0a; color: #fca5a5; }
+
+/* ── Stat boxes ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+@media (max-width: 700px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
+
+.stat-box {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 1.1rem 1rem;
+  text-align: center;
+}
+.stat-label { font-size: .7rem; color: #64748b; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+.stat-value { font-size: 1.7rem; font-weight: 700; }
+
+/* ── Notification flottante ── */
+#notif {
+  position: fixed; top: 1rem; right: 1rem; z-index: 9999;
+  padding: .75rem 1.25rem; border-radius: 10px;
+  font-weight: 600; font-size: .9rem;
+  display: none; animation: slideIn .3s ease;
+}
+#notif.success { background: #14532d; color: #6ee7b7; }
+#notif.error   { background: #7f1d1d; color: #fca5a5; }
+#notif.info    { background: #1e3a5f; color: #93c5fd; }
+@keyframes slideIn { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:none; } }
+
+/* ── Loading spinner ── */
+.loading { text-align: center; color: #64748b; padding: 3rem; }
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid #334155;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  margin: 0 auto 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Note colorée ── */
+.note-ok { color: #34d399; font-weight: 600; }
+.note-ko { color: #f87171; font-weight: 600; }
+
+/* ── Couleurs stat ── */
+.c-violet { color: #a5b4fc; }
+.c-red    { color: #fca5a5; }
+.c-green  { color: #6ee7b7; }
+.c-admis  { color: #34d399; }
+.c-redoub { color: #f87171; }
