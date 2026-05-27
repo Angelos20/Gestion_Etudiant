@@ -32,23 +32,23 @@
 <body>
 
 <nav>
-  <a class="nav-brand" href="/">🎓 GestionEtudiant</a>
-  <a class="nav-link" href="/">🏠 Accueil</a>
-  <a class="nav-link" href="/liste">📋 Liste</a>
-  <a class="nav-link" href="/ajouter">➕ Ajouter</a>
-  <a class="nav-link" href="/statistiques">📊 Statistiques</a>
+  <a class="nav-brand" href="/">GestionEtudiant</a>
+  <a class="nav-link" href="/">Accueil</a>
+  <a class="nav-link" href="/liste">Liste</a>
+  <a class="nav-link" href="/ajouter">Ajouter</a>
+  <a class="nav-link" href="/statistiques">Statistiques</a>
 </nav>
 
 <main>
   <div class="page-header">
-    <h1>📋 Liste des étudiants</h1>
-    <p>Consultez, modifiez ou supprimez un enregistrement</p>
+    <h1>Liste des étudiants</h1>
+
   </div>
 
   <div class="card">
     <div class="search-bar">
       <input type="text" id="recherche" placeholder="🔍 Rechercher par nom ou numéro..." oninput="filtrer()"/>
-      <a class="btn btn-success" href="/ajouter">➕ Ajouter</a>
+      <a class="btn btn-success" href="/ajouter">Ajouter</a>
       <span id="count"></span>
     </div>
 
@@ -59,13 +59,13 @@
 
   <!-- Statistiques bas de page -->
   <div class="card">
-    <h2>📈 Récapitulatif de la classe</h2>
+    <h2>Récapitulatif de la classe</h2>
     <div class="stats-grid" id="stats-zone">
       <div class="stat-box"><div class="stat-label">Moy. Classe</div><div class="stat-value c-violet" id="s-cl">—</div></div>
       <div class="stat-box"><div class="stat-label">Moy. Min</div><div class="stat-value c-red" id="s-mn">—</div></div>
       <div class="stat-box"><div class="stat-label">Moy. Max</div><div class="stat-value c-green" id="s-mx">—</div></div>
-      <div class="stat-box"><div class="stat-label">Admis ✅</div><div class="stat-value c-admis" id="s-ad">—</div></div>
-      <div class="stat-box"><div class="stat-label">Redoublants ❌</div><div class="stat-value c-redoub" id="s-rd">—</div></div>
+      <div class="stat-box"><div class="stat-label">Admis</div><div class="stat-value c-admis" id="s-ad">—</div></div>
+      <div class="stat-box"><div class="stat-label">Redoublants</div><div class="stat-value c-redoub" id="s-rd">—</div></div>
     </div>
   </div>
 </main>
@@ -93,7 +93,7 @@
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="enregistrer()">💾 Enregistrer</button>
+      <button class="btn btn-primary" onclick="enregistrer()">Enregistrer</button>
       <button class="btn btn-secondary" onclick="fermerModal()">Annuler</button>
     </div>
   </div>

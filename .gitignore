@@ -1,0 +1,17 @@
+# Dépendances
+node_modules/
+
+# Fichier environnement
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/

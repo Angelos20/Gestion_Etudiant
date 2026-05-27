@@ -70,39 +70,83 @@ function showLoading(containerId) {
   if (el) el.innerHTML = `<div class="loading"><div class="spinner"></div>Chargement...</div>`;
 }
 
+// ==========================================================
 // Graphiques
-let chartBar, chartPie;
+// ==========================================================
 
+let chartBar = null;
+let chartPie = null;
+
+// =========================
+// Charger stats API
+// =========================
+async function chargerStats() {
+  try {
+    const res = await fetch('/api/statistiques');
+    const stats = await res.json();
+    console.log(stats);
+
+    mettreAJourGraphiques(stats);
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// =========================
+// Graphiques
+// =========================
 function mettreAJourGraphiques(stats) {
 
+  // BAR CHART
   const barData = {
     labels: ['Moy. Classe', 'Min', 'Max'],
     datasets: [{
-      data: [stats.moyenne_classe, stats.moyenne_min, stats.moyenne_max]
+      label: 'Moyennes',
+      data: [
+        stats.moyenne_classe,
+        stats.moyenne_min,
+        stats.moyenne_max
+      ],
+      backgroundColor: ['#6366f1', '#f87171', '#34d399'],
+      borderRadius: 8
     }]
   };
 
   if (!chartBar) {
     chartBar = new Chart(document.getElementById('chartBar'), {
       type: 'bar',
-      data: barData
+      data: barData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        }
+      }
     });
   } else {
     chartBar.data = barData;
     chartBar.update();
   }
 
+  // PIE CHART
   const pieData = {
     labels: ['Admis', 'Redoublants'],
     datasets: [{
-      data: [stats.admis, stats.redoublants]
+      data: [stats.admis, stats.redoublants],
+      backgroundColor: ['#34d399', '#f87171']
     }]
   };
 
   if (!chartPie) {
     chartPie = new Chart(document.getElementById('chartPie'), {
       type: 'pie',
-      data: pieData
+      data: pieData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
     });
   } else {
     chartPie.data = pieData;
@@ -110,16 +154,22 @@ function mettreAJourGraphiques(stats) {
   }
 }
 
-async function chargerStats() {
-  try {
-    const res = await fetch('/api/statistiques');
-    const stats = await res.json();
-    mettreAJourGraphiques(stats);
-  } catch (err) {
-    console.error(err);
+// =========================
+// Switch graphique (optionnel)
+// =========================
+function switchChart(type) {
+  const bar = document.getElementById('chart-bar-wrap');
+  const pie = document.getElementById('chart-pie-wrap');
+
+  if (bar && pie) {
+    bar.style.display = type === 'bar' ? 'block' : 'none';
+    pie.style.display = type === 'pie' ? 'block' : 'none';
   }
 }
+
+// =========================
 // Auto load
+// =========================
 document.addEventListener('DOMContentLoaded', () => {
   chargerStats();
 });

@@ -1,11 +1,14 @@
 {
-  "name": "gestion-etudiant-v2",
-  "version": "2.0.0",
+  "name": "gestion-etudiant-v1",
+  "version": "1.0.0",
   "description": "Gestion des étudiants — Multi-pages + MySQL",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js"
+  },
+  "engines": {
+    "node": "18.x"
   },
   "dependencies": {
     "cors": "^2.8.5",
